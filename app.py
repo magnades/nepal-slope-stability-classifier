@@ -1,41 +1,54 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import tensorflow as tf
 import joblib
+import tensorflow as tf
+from datetime import datetime
+from urllib.error import URLError
 import requests
 import io
-from datetime import datetime
 
-# ------------------------------
-# CONFIGURA TUS URLS DE GITHUB
-# ------------------------------
-MODEL_URL = "https://raw.githubusercontent.com/USUARIO/REPO/main/modelo.h5"
-PREPROCESSOR_URL = "https://raw.githubusercontent.com/USUARIO/REPO/main/preprocessor.pkl"
-ENCODER_URL = "https://raw.githubusercontent.com/USUARIO/REPO/main/stability_encoder.pkl"
+# URLs para los archivos en GitHub
+MODEL_URL = "https://raw.githubusercontent.com/magnades/DurhamSlope/main/model_81_30_31_best.keras"
+PREPROCESSOR_URL = "https://raw.githubusercontent.com/magnades/DurhamSlope/main/preprocessor_81_30_31_best.pkl"
+ENCODER_URL = "https://raw.githubusercontent.com/magnades/DurhamSlope/main/stability_encoder.pkl"
 
-# ------------------------------
-# Cargar modelo y preprocesadores
-# ------------------------------
-@st.cache_resource
-def load_model():
-    response = requests.get(MODEL_URL)
-    with open("modelo.h5", "wb") as f:
-        f.write(response.content)
-    return tf.keras.models.load_model("modelo.h5")
+# Rutas locales para usar cuando no haya internet
+MODEL_PATH = "model_81_30_31_best.keras"
+PREPROCESSOR_PATH = "preprocessor_81_30_31_best.pkl"
+ENCODER_PATH = "stability_encoder.pkl"
 
-@st.cache_resource
+@st.cache_data(show_spinner=True)
+def load_model_from_url(url):
+    response = requests.get(url)
+    response.raise_for_status()
+    return tf.keras.models.load_model(io.BytesIO(response.content))
+
+@st.cache_data(show_spinner=True)
 def load_pickle_from_url(url):
     response = requests.get(url)
+    response.raise_for_status()
     return joblib.load(io.BytesIO(response.content))
 
-model = load_model()
-preprocessor = load_pickle_from_url(PREPROCESSOR_URL)
-encoder = load_pickle_from_url(ENCODER_URL)
+def load_resources():
+    try:
+        st.info("Loading resources from GitHub...")
+        model = load_model_from_url(MODEL_URL)
+        preprocessor = load_pickle_from_url(PREPROCESSOR_URL)
+        encoder = load_pickle_from_url(ENCODER_URL)
+        st.success("Resources loaded from GitHub!")
+    except Exception as e:
+        st.warning(f"Failed to load from GitHub, loading local files: {e}")
+        model = tf.keras.models.load_model(MODEL_PATH)
+        preprocessor = joblib.load(PREPROCESSOR_PATH)
+        encoder = joblib.load(ENCODER_PATH)
+        st.success("Resources loaded from local files.")
+    return model, preprocessor, encoder
 
-# ------------------------------
-# Define features y opciones
-# ------------------------------
+# Carga los modelos y objetos
+model, preprocessor, stability_encoder = load_resources()
+
+# Aquí tus variables, widgets y lógica:
 features_ordered = [
     'PhysiographicRegion', 'RainfallCategory', 'Longitude', 'Latitude', 'ElevationDEM', 'ElevationSite',
     'AverageCutHeight', 'AverageCutSlope', 'FinalOverallSlope', 'Dominant',
@@ -48,13 +61,39 @@ features_ordered = [
     'MaxTopsoilThickness'
 ]
 
+numeric_features_base_A = [
+    'Longitude',
+    'Latitude',
+    'ElevationDEM',
+    'ElevationSite',
+    'AverageCutHeight',
+    'AverageCutSlope',
+    'FinalOverallSlope',
+    'PercentageOfSoil',
+    'CutWidth',
+    'BelowSlope',
+    'AverageTopsoilThickness',
+    'BelowHeight',
+    'MaxTopsoilThickness'
+]
+
 numeric_defaults = {
-    'Longitude': 82.3597222222, 'Latitude': 28.5341666667, 'ElevationDEM': 1868., 'ElevationSite': 1868.,
-    'AverageCutHeight': 10., 'AverageCutSlope': 60, 'FinalOverallSlope': 0., 'PercentageOfSoil': 50.,
-    'CutWidth': 25., 'BelowSlope': 70., 'AverageTopsoilThickness': 5, 'BelowHeight': 50, 'MaxTopsoilThickness': 5,
+    'Longitude': 82.3597222222,
+    'Latitude': 28.5341666667,
+    'ElevationDEM': 1868.,
+    'ElevationSite': 1868.,
+    'AverageCutHeight': 10.,
+    'AverageCutSlope': 60,
+    'FinalOverallSlope': 0.,
+    'PercentageOfSoil': 50.,
+    'CutWidth': 25.,
+    'BelowSlope': 70.,
+    'AverageTopsoilThickness': 5,
+    'BelowHeight': 50,
+    'MaxTopsoilThickness': 5,
 }
 
-categorical_options = {
+options_dict = {
     'PhysiographicRegion': ['MidHill', 'Chure', 'UpperHill'],
     'RainfallCategory': ['L', 'H', 'M'],
     'Dominant': ['Both', 'Soil', 'Rock'],
@@ -75,29 +114,35 @@ categorical_options = {
     'DrainageCondition': ['Functional', 'NeedsRepairOrCleaning', 'UnderConstruction'],
 }
 
-st.title("Nepal Slope Stability Classifier")
-st.markdown("This app predicts slope stability using a machine learning model trained on Nepal slope data.")
+st.title("Slope Stability Prediction - Nepal Case Study")
 
-user_input = {}
+st.header("Input features")
 
-# Entradas numéricas
-st.subheader("Numeric Features")
-for feature in numeric_defaults:
-    user_input[feature] = st.number_input(feature, value=numeric_defaults[feature])
+numeric_inputs = {}
+for feature in numeric_features_base_A:
+    numeric_inputs[feature] = st.number_input(f"{feature}", value=numeric_defaults.get(feature, 0.0))
 
-# Entradas categóricas
-st.subheader("Categorical Features")
-for feature, options in categorical_options.items():
-    user_input[feature] = st.selectbox(feature, options)
+categorical_inputs = {}
+for feature in options_dict.keys():
+    categorical_inputs[feature] = st.selectbox(f"{feature}", options=options_dict[feature])
 
-# Ejecutar predicción
-if st.button("Predict Stability"):
-    input_ordered = [user_input[feat] for feat in features_ordered]
-    df = pd.DataFrame([input_ordered], columns=features_ordered)
-    transformed = preprocessor.transform(df)
-    prediction = model.predict(transformed)
-    predicted_class = encoder.inverse_transform([np.argmax(prediction)])
+def predict(model, preprocessor, encoder, numeric_inputs, categorical_inputs):
+    # Organizar datos en orden
+    inputs = {}
+    inputs.update(numeric_inputs)
+    inputs.update(categorical_inputs)
 
-    st.success(f"Predicted Class: {predicted_class[0]}")
-    st.write(f"Raw probabilities: {prediction.tolist()}")
-    st.caption(f"Prediction time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    ordered_values = [inputs[feat] for feat in features_ordered]
+    input_df = pd.DataFrame([ordered_values], columns=features_ordered)
+
+    preprocessed = preprocessor.transform(input_df)
+    prediction = model.predict(preprocessed)
+    pred_class_idx = np.argmax(prediction, axis=1)
+    pred_class = encoder.inverse_transform(pred_class_idx)
+    return prediction, pred_class[0]
+
+if st.button("Predict"):
+    prediction, pred_class = predict(model, preprocessor, stability_encoder, numeric_inputs, categorical_inputs)
+    st.write(f"Prediction probabilities: {prediction}")
+    st.success(f"Predicted class: {pred_class} at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+
