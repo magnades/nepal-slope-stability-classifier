@@ -9,6 +9,7 @@ import os
 import io
 import tempfile
 from datetime import datetime
+import pydeck as pdk
 
 # URLs de los recursos en GitHub
 MODEL_URL = "https://raw.githubusercontent.com/magnades/DurhamSlope/main/model_81_30_31_best.keras"
@@ -105,6 +106,34 @@ for feature in numeric_defaults:
 st.subheader("Categorical Features")
 for feature, options in categorical_options.items():
     user_input[feature] = st.selectbox(feature, options)
+
+# Inputs del usuario
+st.subheader("🌐 Location Input")
+latitude = st.number_input("Latitude", value=28.5341666667, format="%.6f")
+longitude = st.number_input("Longitude", value=82.3597222222, format="%.6f")
+
+# Mostrar en el mapa
+st.subheader("🗺️ Slope Location Map")
+map_data = pd.DataFrame({'lat': [latitude], 'lon': [longitude]})
+
+st.pydeck_chart(pdk.Deck(
+    map_style='mapbox://styles/mapbox/light-v9',
+    initial_view_state=pdk.ViewState(
+        latitude=latitude,
+        longitude=longitude,
+        zoom=10,
+        pitch=0,
+    ),
+    layers=[
+        pdk.Layer(
+            "ScatterplotLayer",
+            data=map_data,
+            get_position='[lon, lat]',
+            get_color='[255, 0, 0, 160]',
+            get_radius=200,
+        ),
+    ],
+))
 
 # Ejecutar predicción
 if st.button("Predict Stability"):
