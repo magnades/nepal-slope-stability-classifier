@@ -100,8 +100,8 @@ with col1:
             user_input[feature] = st.number_input(feature, value=numeric_defaults[feature], key=f"num_{feature}")
 
     st.subheader("🌐 Location Input")
-    latitude = st.number_input("Latitude", value=27.7172, format="%.6f", key="latitude")
-    longitude = st.number_input("Longitude", value=85.3240, format="%.6f", key="longitude")
+    latitude = st.number_input("Latitude", value=28.5341666667, format="%.6f", key="latitude")
+    longitude = st.number_input("Longitude", value=82.3597222222, format="%.6f", key="longitude")
     user_input['Latitude'] = latitude
     user_input['Longitude'] = longitude
 
