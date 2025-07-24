@@ -87,10 +87,10 @@ categorical_options = {
 }
 
 slopes_categories_dict = {
-    'A': 'Stable',
-    'B': 'Stable to Unstable',
-    'C': 'Unstable',
-    'D': 'Very Unstable',
+    'A': 'Stable, A',
+    'B': 'Slightly Unstable, B',
+    'C': 'Moderately Unstable, C',
+    'D': 'Highly Unstable, D',
 }
 st.title("Nepal Slope Stability Classifier")
 st.markdown("This app predicts slope stability using a machine learning model trained on Nepal slope data.")
