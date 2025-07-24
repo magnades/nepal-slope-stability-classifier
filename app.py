@@ -111,7 +111,7 @@ with col1:
         map_style=None,
         initial_view_state=pdk.ViewState(
             latitude=28.40690234,
-            longitude=84.26631178,
+            longitude=94.26631178,
             zoom=4.5,
             pitch=0,
         ),
