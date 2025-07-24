@@ -10,7 +10,6 @@ import tempfile
 from datetime import datetime
 import pydeck as pdk
 
-# URLs de los recursos en GitHub
 MODEL_URL = "https://raw.githubusercontent.com/magnades/DurhamSlope/main/model_81_30_31_best.keras"
 PREPROCESSOR_URL = "https://raw.githubusercontent.com/magnades/DurhamSlope/main/preprocessor_81_30_31_best.pkl"
 ENCODER_URL = "https://raw.githubusercontent.com/magnades/DurhamSlope/main/stability_encoder.pkl"
@@ -45,7 +44,6 @@ def load_resources():
         raise
     return model, preprocessor, encoder
 
-# Carga los modelos y objetos
 model, preprocessor, stability_encoder = load_resources()
 
 features_ordered = [
@@ -55,8 +53,9 @@ features_ordered = [
     'BlockedRoadsideDrain', 'BlockedSlopeDrainage', 'DrainageCat2',
     'PercentageOfSoil', 'CutSlopeBioCat1', 'Aspect', 'CutWidth',
     'StructureCat2', 'BelowSlope', 'AverageTopsoilThickness',
-    'RockStrength', 'LithologyRockTypeCat2', 'WeatheringGradeCat2',
-    'BelowHeight', 'DrainageCondition', 'MaxTopsoilThickness'
+    'RockStrength', 'LithologyRockTypeCat2',
+    'WeatheringGradeCat2', 'BelowHeight', 'DrainageCondition',
+    'MaxTopsoilThickness'
 ]
 
 numeric_defaults = {
@@ -66,8 +65,8 @@ numeric_defaults = {
 }
 
 categorical_options = {
-    'RainfallCategory': ['L', 'H', 'M'],
     'PhysiographicRegion': ['MidHill', 'Chure', 'UpperHill'],
+    'RainfallCategory': ['L', 'H', 'M'],
     'Dominant': ['Both', 'Soil', 'Rock'],
     'CracksOnSlope': ['No', 'Yes'],
     'SeepageOfSlopeSurface': ['No', 'Yes'],
@@ -81,7 +80,8 @@ categorical_options = {
     'Aspect': ['W', 'N', 'S', 'E', 'NE', 'NW', 'SW', 'SE'],
     'StructureCat2': ['NoEffectiveness', 'RigidStructure', 'FlexibleStructure'],
     'RockStrength': ['Hard', 'VeryWeak', 'Moderate', 'Weak', 'ExtremelyHard', 'VeryHard'],
-    'LithologyRockTypeCat2': ['CrystallineBanded', 'CrystallineCarbonate', 'CrystallineHard', 'Cemented', 'FineGrained', 'Conglomerate', 'AlluvialDeposit'],
+    'LithologyRockTypeCat2': ['CrystallineBanded', 'CrystallineCarbonate', 'CrystallineHard', 'Cemented', 'FineGrained',
+                              'Conglomerate', 'AlluvialDeposit'],
     'WeatheringGradeCat2': ['II', 'I', 'III', 'IV', 'V'],
     'DrainageCondition': ['Functional', 'NeedsRepairOrCleaning', 'UnderConstruction'],
 }
@@ -90,73 +90,77 @@ st.title("Nepal Slope Stability Classifier")
 st.markdown("This app predicts slope stability using a machine learning model trained on Nepal slope data.")
 
 user_input = {}
+
 col1, col2 = st.columns(2)
 
 with col1:
-    st.subheader("📊 Numeric Features")
+    st.subheader("Numeric Features")
     for feature in numeric_defaults:
-        user_input[feature] = st.number_input(feature, value=numeric_defaults[feature])
+        if feature not in ['Latitude', 'Longitude']:
+            user_input[feature] = st.number_input(feature, value=numeric_defaults[feature], key=f"num_{feature}")
 
+    st.subheader("🌐 Location Input")
+    latitude = st.number_input("Latitude", value=27.7172, format="%.6f", key="latitude")
+    longitude = st.number_input("Longitude", value=85.3240, format="%.6f", key="longitude")
+    user_input['Latitude'] = latitude
+    user_input['Longitude'] = longitude
 
-    if st.button("🔮 Predict Stability"):
-        input_ordered = [user_input[feat] for feat in features_ordered]
-        df = pd.DataFrame([input_ordered], columns=features_ordered)
-        transformed = preprocessor.transform(df)
-        prediction = model.predict(transformed)
-        predicted_class = stability_encoder.inverse_transform([np.argmax(prediction)])
-        st.success(f"Predicted Class: {predicted_class[0]}")
-        st.write(f"Raw probabilities: {prediction.tolist()}")
-        st.caption(f"Prediction time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    st.subheader("🗺️ Slope Location Map")
+    map_data = pd.DataFrame({'lat': [latitude], 'lon': [longitude]})
+    st.pydeck_chart(pdk.Deck(
+        map_style=None,
+        initial_view_state=pdk.ViewState(
+            latitude=latitude,
+            longitude=longitude,
+            zoom=10,
+            pitch=0,
+        ),
+        layers=[
+            pdk.Layer(
+                'ScatterplotLayer',
+                data=[{"position": [longitude, latitude]}],
+                get_position='position',
+                get_color='[255, 0, 0, 160]',
+                get_radius=300,
+            ),
+        ],
+    ))
 
 with col2:
-    st.subheader("📌 Binary Features (Yes / No)")
-    binary_features = ['CracksOnSlope', 'SeepageOfSlopeSurface', 'RecentFailureDebrisOnSlope', 'Erosion', 'CracksAtSlopeSides', 'BlockedRoadsideDrain', 'BlockedSlopeDrainage']
-    for feature in binary_features:
-        label = feature.replace("Of", " of ").replace("On", " on ").replace("At", " at ")
-        user_input[feature] = "Yes" if st.checkbox(label, value=False) else "No"
+    st.subheader("Categorical Features")
 
-    st.subheader("🌧️ Clima y Ubicación")
-    for feature in ['RainfallCategory', 'PhysiographicRegion']:
-        print(st.selectbox(feature, categorical_options[feature]))
-        user_input[feature] = st.selectbox(feature, categorical_options[feature])
+    # Grupo 1: Binarios Yes/No
+    st.markdown("**Slope Conditions**")
+    for feature in ['CracksOnSlope', 'SeepageOfSlopeSurface', 'RecentFailureDebrisOnSlope',
+                    'Erosion', 'CracksAtSlopeSides', 'BlockedRoadsideDrain', 'BlockedSlopeDrainage']:
+        user_input[feature] = st.selectbox(feature, categorical_options[feature], key=f"cat_{feature}")
 
-    st.subheader("🧱 Geología / Litología")
-    for feature in ['RockStrength', 'LithologyRockTypeCat2', 'WeatheringGradeCat2']:
-        user_input[feature] = st.selectbox(feature, categorical_options[feature])
+    # Grupo 2: Regiones y clima
+    st.markdown("**Geographic/Climatic**")
+    for feature in ['PhysiographicRegion', 'RainfallCategory', 'Aspect']:
+        user_input[feature] = st.selectbox(feature, categorical_options[feature], key=f"cat_{feature}")
 
-    st.subheader("🌿 Cobertura Vegetal")
-    for feature in ['CutSlopeBioCat1']:
-        user_input[feature] = st.selectbox(feature, categorical_options[feature])
+    # Grupo 3: Geología
+    st.markdown("**Geology**")
+    for feature in ['Dominant', 'RockStrength', 'LithologyRockTypeCat2', 'WeatheringGradeCat2']:
+        user_input[feature] = st.selectbox(feature, categorical_options[feature], key=f"cat_{feature}")
 
-    st.subheader("🚧 Infraestructura y Drenaje")
-    for feature in ['StructureCat2', 'DrainageCat2', 'DrainageCondition']:
-        user_input[feature] = st.selectbox(feature, categorical_options[feature])
+    # Grupo 4: Infraestructura y drenaje
+    st.markdown("**Drainage & Structures**")
+    for feature in ['DrainageCat2', 'StructureCat2', 'DrainageCondition']:
+        user_input[feature] = st.selectbox(feature, categorical_options[feature], key=f"cat_{feature}")
 
-    st.subheader("🧭 Geometría y Suelo")
-    for feature in ['Aspect', 'Dominant']:
-        user_input[feature] = st.selectbox(feature, categorical_options[feature])
+    # Grupo 5: Vegetación
+    st.markdown("**Vegetation**")
+    user_input['CutSlopeBioCat1'] = st.selectbox('CutSlopeBioCat1', categorical_options['CutSlopeBioCat1'], key="cat_CutSlopeBioCat1")
 
-st.subheader("🌐 Location Input")
-user_input["Latitude"] = st.number_input("Latitude", value=28.5341666667, format="%.6f")
-user_input["Longitude"] = st.number_input("Longitude", value=82.3597222222, format="%.6f")
+if st.button("Predict Stability"):
+    input_ordered = [user_input[feat] for feat in features_ordered]
+    df = pd.DataFrame([input_ordered], columns=features_ordered)
+    transformed = preprocessor.transform(df)
+    prediction = model.predict(transformed)
+    predicted_class = stability_encoder.inverse_transform([np.argmax(prediction)])
 
-st.subheader("🗺️ Slope Location Map")
-map_data = pd.DataFrame({'lat': [user_input["Latitude"]], 'lon': [user_input["Longitude"]]})
-st.pydeck_chart(pdk.Deck(
-    map_style=None,
-    initial_view_state=pdk.ViewState(
-        latitude=user_input["Latitude"],
-        longitude=user_input["Longitude"],
-        zoom=10,
-        pitch=0,
-    ),
-    layers=[
-        pdk.Layer(
-            'ScatterplotLayer',
-            data=[{"position": [user_input["Longitude"], user_input["Latitude"]]}],
-            get_position='position',
-            get_color='[255, 0, 0, 160]',
-            get_radius=300,
-        ),
-    ],
-))
+    st.success(f"Predicted Class: {predicted_class[0]}")
+    st.write(f"Raw probabilities: {prediction.tolist()}")
+    st.caption(f"Prediction time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
