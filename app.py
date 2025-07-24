@@ -102,10 +102,48 @@ st.subheader("Numeric Features")
 for feature in numeric_defaults:
     user_input[feature] = st.number_input(feature, value=numeric_defaults[feature])
 
-# Entradas categóricas
-st.subheader("Categorical Features")
-for feature, options in categorical_options.items():
-    user_input[feature] = st.selectbox(feature, options)
+# ✅ Binary fields como checkboxes
+st.subheader("📌 Binary Features (Yes / No)")
+binary_features = ['CracksOnSlope', 'SeepageOfSlopeSurface', 'RecentFailureDebrisOnSlope',
+                   'Erosion', 'CracksAtSlopeSides', 'BlockedRoadsideDrain', 'BlockedSlopeDrainage']
+for feature in binary_features:
+    label = feature.replace("Of", " of ").replace("On", " on ").replace("At", " at ")
+    user_input[feature] = "Yes" if st.checkbox(label, value=False) else "No"
+
+# 🌧️ Clima y ubicación
+st.subheader("🌧️ Clima y Ubicación")
+for feature in ['PhysiographicRegion', 'RainfallCategory']:
+    user_input[feature] = st.selectbox(feature, categorical_options[feature])
+
+# 🧱 Geología y litología
+st.subheader("🧱 Geología / Litología")
+for feature in ['RockStrength', 'LithologyRockTypeCat2', 'WeatheringGradeCat2']:
+    user_input[feature] = st.selectbox(feature, categorical_options[feature])
+
+# 🌿 Cobertura vegetal y erosión
+st.subheader("🌿 Cobertura Vegetal y Erosión")
+for feature in ['CutSlopeBioCat1']:
+    user_input[feature] = st.selectbox(feature, categorical_options[feature])
+# Nota: "Erosion" ya fue incluido como checkbox arriba
+
+# 🚧 Infraestructura y drenaje
+st.subheader("🚧 Infraestructura y Drenaje")
+for feature in ['StructureCat2', 'DrainageCat2', 'DrainageCondition']:
+    user_input[feature] = st.selectbox(feature, categorical_options[feature])
+# Nota: "Blocked*" ya están en checkboxes
+
+# 🧭 Orientación y geometría
+st.subheader("🧭 Orientación y Geometría")
+for feature in ['Aspect', 'FinalOverallSlope', 'CutWidth']:
+    user_input[feature] = st.selectbox(feature, categorical_options.get(feature, ['N/A']))
+
+# 🌍 Composición del suelo
+st.subheader("🌍 Composición del Suelo")
+for feature in ['Dominant', 'PercentageOfSoil', 'AverageTopsoilThickness', 'MaxTopsoilThickness',
+                'BelowSlope', 'BelowHeight']:
+    user_input[feature] = st.selectbox(feature, categorical_options.get(feature, ['N/A'])) if feature in categorical_options else st.number_input(feature, value=numeric_defaults.get(feature, 0.0))
+
+# 🕳️ Fallas y grietas adicionales (ya están como checkbox)
 
 # Inputs del usuario
 st.subheader("🌐 Location Input")
