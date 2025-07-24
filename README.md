@@ -24,6 +24,8 @@ This is a Streamlit web app that predicts the **slope stability** category for s
 
 You can try the app online (if hosted on Hugging Face Spaces or other platforms).
 
+https://nepal-slope-stability-classifier.streamlit.app/
+
 ## Authors
 
 - Juan-Carlos Pantoja, Joaquim Tinoco, Ellen B. Robson, Bhim Kumar Dahal,Prajwal Timsina, Tunisha Gywali, Paul N. Hughes
