@@ -115,7 +115,7 @@ with col1:
     map_data = pd.DataFrame({'lat': [latitude], 'lon': [longitude]})
 
     st.pydeck_chart(pdk.Deck(
-        map_style='mapbox://styles/mapbox/light-v9',
+        map_style= None,#'mapbox://styles/mapbox/light-v9',
         initial_view_state=pdk.ViewState(
             latitude=latitude,
             longitude=longitude,
