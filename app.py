@@ -119,7 +119,7 @@ st.subheader("🗺️ Slope Location Map")
 map_data = pd.DataFrame({'lat': [latitude], 'lon': [longitude]})
 
 st.pydeck_chart(pdk.Deck(
-    map_style='mapbox://styles/mapbox/streets-v11',
+    map_style=None,
     initial_view_state=pdk.ViewState(
         latitude=latitude,
         longitude=longitude,
