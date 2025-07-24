@@ -86,6 +86,12 @@ categorical_options = {
     'DrainageCondition': ['Functional', 'NeedsRepairOrCleaning', 'UnderConstruction'],
 }
 
+slopes_categories_dict = {
+    'A': 'Stable',
+    'B': 'Stable to Unstable',
+    'C': 'Unstable',
+    'D': 'Very Unstable',
+}
 st.title("Nepal Slope Stability Classifier")
 st.markdown("This app predicts slope stability using a machine learning model trained on Nepal slope data.")
 
@@ -162,6 +168,6 @@ if st.button("Predict Stability"):
     prediction = model.predict(transformed)
     predicted_class = stability_encoder.inverse_transform([np.argmax(prediction)])
 
-    st.success(f"Predicted Class: {predicted_class[0]}")
+    st.success(f"Predicted Class: {slopes_categories_dict[predicted_class[0]]}")
     st.write(f"Raw probabilities: {prediction.tolist()}")
     st.caption(f"Prediction time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
