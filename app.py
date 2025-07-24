@@ -109,8 +109,10 @@ for feature, options in categorical_options.items():
 
 # Inputs del usuario
 st.subheader("🌐 Location Input")
-latitude = st.number_input("Latitude", value=28.5341666667, format="%.6f")
-longitude = st.number_input("Longitude", value=82.3597222222, format="%.6f")
+
+# Coordenadas de ejemplo (puedes usar las que el usuario introduzca)
+latitude = 27.7172
+longitude = 85.3240
 
 # Mostrar en el mapa
 st.subheader("🗺️ Slope Location Map")
