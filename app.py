@@ -99,7 +99,32 @@ with col1:
         if feature not in ['Latitude', 'Longitude']:
             user_input[feature] = st.number_input(feature, value=numeric_defaults[feature], key=f"num_{feature}")
 
+    st.subheader("🌐 Location Input")
+    latitude = st.number_input("Latitude", value=28.5341666667, format="%.6f", key="latitude")
+    longitude = st.number_input("Longitude", value=82.3597222222, format="%.6f", key="longitude")
+    user_input['Latitude'] = latitude
+    user_input['Longitude'] = longitude
 
+    st.subheader("🗺️ Slope Location Map")
+    map_data = pd.DataFrame({'lat': [latitude], 'lon': [longitude]})
+    st.pydeck_chart(pdk.Deck(
+        map_style=None,
+        initial_view_state=pdk.ViewState(
+            latitude=28.40690234,
+            longitude=84.26631178,
+            zoom=7,
+            pitch=0,
+        ),
+        layers=[
+            pdk.Layer(
+                'ScatterplotLayer',
+                data=[{"position": [longitude, latitude]}],
+                get_position='position',
+                get_color='[255, 0, 0, 160]',
+                get_radius=300,
+            ),
+        ],
+    ))
 
 with col2:
     st.subheader("Categorical Features")
@@ -139,30 +164,3 @@ if st.button("Predict Stability"):
     st.success(f"Predicted Class: {predicted_class[0]}")
     st.write(f"Raw probabilities: {prediction.tolist()}")
     st.caption(f"Prediction time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-
-st.subheader("🌐 Location Input")
-    latitude = st.number_input("Latitude", value=28.5341666667, format="%.6f", key="latitude")
-    longitude = st.number_input("Longitude", value=82.3597222222, format="%.6f", key="longitude")
-    user_input['Latitude'] = latitude
-    user_input['Longitude'] = longitude
-
-    st.subheader("🗺️ Slope Location Map")
-    map_data = pd.DataFrame({'lat': [latitude], 'lon': [longitude]})
-    st.pydeck_chart(pdk.Deck(
-        map_style=None,
-        initial_view_state=pdk.ViewState(
-            latitude=28.40690234,
-            longitude=84.26631178,
-            zoom=7,
-            pitch=0,
-        ),
-        layers=[
-            pdk.Layer(
-                'ScatterplotLayer',
-                data=[{"position": [longitude, latitude]}],
-                get_position='position',
-                get_color='[255, 0, 0, 160]',
-                get_radius=300,
-            ),
-        ],
-    ))
