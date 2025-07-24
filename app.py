@@ -66,8 +66,8 @@ numeric_defaults = {
 }
 
 categorical_options = {
-    'PhysiographicRegion': ['MidHill', 'Chure', 'UpperHill'],
     'RainfallCategory': ['L', 'H', 'M'],
+    'PhysiographicRegion': ['MidHill', 'Chure', 'UpperHill'],
     'Dominant': ['Both', 'Soil', 'Rock'],
     'CracksOnSlope': ['No', 'Yes'],
     'SeepageOfSlopeSurface': ['No', 'Yes'],
