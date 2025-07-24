@@ -107,21 +107,22 @@ with col1:
 
     st.subheader("🗺️ Slope Location Map")
     map_data = pd.DataFrame({'lat': [latitude], 'lon': [longitude]})
+
     st.pydeck_chart(pdk.Deck(
-        map_style=None,
+        map_style='mapbox://styles/mapbox/light-v9',
         initial_view_state=pdk.ViewState(
-            latitude=28.40690234,
-            longitude=94.26631178,
-            zoom=4.5,
+            latitude=latitude,
+            longitude=longitude,
+            zoom=10,
             pitch=0,
         ),
         layers=[
             pdk.Layer(
                 'ScatterplotLayer',
-                data=[{"position": [longitude, latitude]}],
-                get_position='position',
+                data=map_data,
+                get_position='[lon, lat]',
                 get_color='[255, 0, 0, 160]',
-                get_radius=600,
+                get_radius=500,
             ),
         ],
     ))
