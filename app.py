@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -49,9 +48,6 @@ def load_resources():
 # Carga los modelos y objetos
 model, preprocessor, stability_encoder = load_resources()
 
-# ------------------------------
-# Define features y opciones
-# ------------------------------
 features_ordered = [
     'PhysiographicRegion', 'RainfallCategory', 'Longitude', 'Latitude', 'ElevationDEM', 'ElevationSite',
     'AverageCutHeight', 'AverageCutSlope', 'FinalOverallSlope', 'Dominant',
@@ -59,9 +55,8 @@ features_ordered = [
     'BlockedRoadsideDrain', 'BlockedSlopeDrainage', 'DrainageCat2',
     'PercentageOfSoil', 'CutSlopeBioCat1', 'Aspect', 'CutWidth',
     'StructureCat2', 'BelowSlope', 'AverageTopsoilThickness',
-    'RockStrength', 'LithologyRockTypeCat2',
-    'WeatheringGradeCat2', 'BelowHeight', 'DrainageCondition',
-    'MaxTopsoilThickness'
+    'RockStrength', 'LithologyRockTypeCat2', 'WeatheringGradeCat2',
+    'BelowHeight', 'DrainageCondition', 'MaxTopsoilThickness'
 ]
 
 numeric_defaults = {
@@ -86,8 +81,7 @@ categorical_options = {
     'Aspect': ['W', 'N', 'S', 'E', 'NE', 'NW', 'SW', 'SE'],
     'StructureCat2': ['NoEffectiveness', 'RigidStructure', 'FlexibleStructure'],
     'RockStrength': ['Hard', 'VeryWeak', 'Moderate', 'Weak', 'ExtremelyHard', 'VeryHard'],
-    'LithologyRockTypeCat2': ['CrystallineBanded', 'CrystallineCarbonate', 'CrystallineHard', 'Cemented', 'FineGrained',
-                              'Conglomerate', 'AlluvialDeposit'],
+    'LithologyRockTypeCat2': ['CrystallineBanded', 'CrystallineCarbonate', 'CrystallineHard', 'Cemented', 'FineGrained', 'Conglomerate', 'AlluvialDeposit'],
     'WeatheringGradeCat2': ['II', 'I', 'III', 'IV', 'V'],
     'DrainageCondition': ['Functional', 'NeedsRepairOrCleaning', 'UnderConstruction'],
 }
@@ -96,93 +90,71 @@ st.title("Nepal Slope Stability Classifier")
 st.markdown("This app predicts slope stability using a machine learning model trained on Nepal slope data.")
 
 user_input = {}
+col1, col2 = st.columns(2)
 
-# Entradas numéricas
-st.subheader("Numeric Features")
-for feature in numeric_defaults:
-    user_input[feature] = st.number_input(feature, value=numeric_defaults[feature])
+with col1:
+    st.subheader("📊 Numeric Features")
+    for feature in numeric_defaults:
+        user_input[feature] = st.number_input(feature, value=numeric_defaults[feature])
 
-# ✅ Binary fields como checkboxes
-st.subheader("📌 Binary Features (Yes / No)")
-binary_features = ['CracksOnSlope', 'SeepageOfSlopeSurface', 'RecentFailureDebrisOnSlope',
-                   'Erosion', 'CracksAtSlopeSides', 'BlockedRoadsideDrain', 'BlockedSlopeDrainage']
-for feature in binary_features:
-    label = feature.replace("Of", " of ").replace("On", " on ").replace("At", " at ")
-    user_input[feature] = "Yes" if st.checkbox(label, value=False) else "No"
+    st.subheader("🌐 Location Input")
+    user_input["Latitude"] = st.number_input("Latitude", value=27.7172, format="%.6f")
+    user_input["Longitude"] = st.number_input("Longitude", value=85.3240, format="%.6f")
 
-# 🌧️ Clima y ubicación
-st.subheader("🌧️ Clima y Ubicación")
-for feature in ['PhysiographicRegion', 'RainfallCategory']:
-    user_input[feature] = st.selectbox(feature, categorical_options[feature])
-
-# 🧱 Geología y litología
-st.subheader("🧱 Geología / Litología")
-for feature in ['RockStrength', 'LithologyRockTypeCat2', 'WeatheringGradeCat2']:
-    user_input[feature] = st.selectbox(feature, categorical_options[feature])
-
-# 🌿 Cobertura vegetal y erosión
-st.subheader("🌿 Cobertura Vegetal y Erosión")
-for feature in ['CutSlopeBioCat1']:
-    user_input[feature] = st.selectbox(feature, categorical_options[feature])
-# Nota: "Erosion" ya fue incluido como checkbox arriba
-
-# 🚧 Infraestructura y drenaje
-st.subheader("🚧 Infraestructura y Drenaje")
-for feature in ['StructureCat2', 'DrainageCat2', 'DrainageCondition']:
-    user_input[feature] = st.selectbox(feature, categorical_options[feature])
-# Nota: "Blocked*" ya están en checkboxes
-
-# 🧭 Orientación y geometría
-st.subheader("🧭 Orientación y Geometría")
-for feature in ['Aspect', 'FinalOverallSlope', 'CutWidth']:
-    user_input[feature] = st.selectbox(feature, categorical_options.get(feature, ['N/A']))
-
-# 🌍 Composición del suelo
-st.subheader("🌍 Composición del Suelo")
-for feature in ['Dominant', 'PercentageOfSoil', 'AverageTopsoilThickness', 'MaxTopsoilThickness',
-                'BelowSlope', 'BelowHeight']:
-    user_input[feature] = st.selectbox(feature, categorical_options.get(feature, ['N/A'])) if feature in categorical_options else st.number_input(feature, value=numeric_defaults.get(feature, 0.0))
-
-# 🕳️ Fallas y grietas adicionales (ya están como checkbox)
-
-# Inputs del usuario
-st.subheader("🌐 Location Input")
-
-# Coordenadas de ejemplo (puedes usar las que el usuario introduzca)
-latitude = st.number_input("Latitud", value=27.7172, format="%.6f")
-longitude = st.number_input("Longitud", value=85.3240, format="%.6f")
-
-# Mostrar en el mapa
-st.subheader("🗺️ Slope Location Map")
-map_data = pd.DataFrame({'lat': [latitude], 'lon': [longitude]})
-
-st.pydeck_chart(pdk.Deck(
-    map_style=None,
-    initial_view_state=pdk.ViewState(
-        latitude=latitude,
-        longitude=longitude,
-        zoom=10,
-        pitch=0,
-    ),
-    layers=[
-        pdk.Layer(
-            'ScatterplotLayer',
-            data=[{"position": [longitude, latitude]}],
-            get_position='position',
-            get_color='[255, 0, 0, 160]',
-            get_radius=300,
+    st.subheader("🗺️ Slope Location Map")
+    map_data = pd.DataFrame({'lat': [user_input["Latitude"]], 'lon': [user_input["Longitude"]]})
+    st.pydeck_chart(pdk.Deck(
+        map_style=None,
+        initial_view_state=pdk.ViewState(
+            latitude=user_input["Latitude"],
+            longitude=user_input["Longitude"],
+            zoom=10,
+            pitch=0,
         ),
-    ],
-))
+        layers=[
+            pdk.Layer(
+                'ScatterplotLayer',
+                data=[{"position": [user_input["Longitude"], user_input["Latitude"]]}],
+                get_position='position',
+                get_color='[255, 0, 0, 160]',
+                get_radius=300,
+            ),
+        ],
+    ))
 
-# Ejecutar predicción
-if st.button("Predict Stability"):
-    input_ordered = [user_input[feat] for feat in features_ordered]
-    df = pd.DataFrame([input_ordered], columns=features_ordered)
-    transformed = preprocessor.transform(df)
-    prediction = model.predict(transformed)
-    predicted_class = stability_encoder.inverse_transform([np.argmax(prediction)])
+    if st.button("🔮 Predict Stability"):
+        input_ordered = [user_input[feat] for feat in features_ordered]
+        df = pd.DataFrame([input_ordered], columns=features_ordered)
+        transformed = preprocessor.transform(df)
+        prediction = model.predict(transformed)
+        predicted_class = stability_encoder.inverse_transform([np.argmax(prediction)])
+        st.success(f"Predicted Class: {predicted_class[0]}")
+        st.write(f"Raw probabilities: {prediction.tolist()}")
+        st.caption(f"Prediction time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
-    st.success(f"Predicted Class: {predicted_class[0]}")
-    st.write(f"Raw probabilities: {prediction.tolist()}")
-    st.caption(f"Prediction time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+with col2:
+    st.subheader("📌 Binary Features (Yes / No)")
+    binary_features = ['CracksOnSlope', 'SeepageOfSlopeSurface', 'RecentFailureDebrisOnSlope', 'Erosion', 'CracksAtSlopeSides', 'BlockedRoadsideDrain', 'BlockedSlopeDrainage']
+    for feature in binary_features:
+        label = feature.replace("Of", " of ").replace("On", " on ").replace("At", " at ")
+        user_input[feature] = "Yes" if st.checkbox(label, value=False) else "No"
+
+    st.subheader("🌧️ Clima y Ubicación")
+    for feature in ['PhysiographicRegion', 'RainfallCategory']:
+        user_input[feature] = st.selectbox(feature, categorical_options[feature])
+
+    st.subheader("🧱 Geología / Litología")
+    for feature in ['RockStrength', 'LithologyRockTypeCat2', 'WeatheringGradeCat2']:
+        user_input[feature] = st.selectbox(feature, categorical_options[feature])
+
+    st.subheader("🌿 Cobertura Vegetal")
+    for feature in ['CutSlopeBioCat1']:
+        user_input[feature] = st.selectbox(feature, categorical_options[feature])
+
+    st.subheader("🚧 Infraestructura y Drenaje")
+    for feature in ['StructureCat2', 'DrainageCat2', 'DrainageCondition']:
+        user_input[feature] = st.selectbox(feature, categorical_options[feature])
+
+    st.subheader("🧭 Geometría y Suelo")
+    for feature in ['Aspect', 'Dominant']:
+        user_input[feature] = st.selectbox(feature, categorical_options[feature])
