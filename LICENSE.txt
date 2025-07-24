@@ -1,0 +1,12 @@
+Copyright (c) 2025 Juan Carlos Pantoja Moyano
+
+All rights reserved.
+
+This software and associated files are proprietary and confidential. 
+Unauthorized copying, distribution, modification, or use of this code, 
+in whole or in part, is strictly prohibited without the express written permission of the author.
+
+This repository is provided for academic and research purposes only. 
+Commercial use is not permitted.
+
+For inquiries or permission requests, please contact: ingciviljuanpantoja@hotmail.com
