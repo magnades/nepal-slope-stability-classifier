@@ -94,7 +94,7 @@ user_input = {}
 col1, col2 = st.columns(2)
 
 with col1:
-    st.subheader("Numeric Features")
+    st.subheader("📊 Numeric Features")
     for feature in numeric_defaults:
         if feature not in ['Latitude', 'Longitude']:
             user_input[feature] = st.number_input(feature, value=numeric_defaults[feature], key=f"num_{feature}")
@@ -128,31 +128,31 @@ with col1:
     ))
 
 with col2:
-    st.subheader("Categorical Features")
+    st.subheader("🧩 Categorical Features")
 
     # Grupo 1: Binarios Yes/No
-    st.markdown("**Slope Conditions**")
+    st.markdown("**🌍 Slope Conditions**")
     for feature in ['CracksOnSlope', 'SeepageOfSlopeSurface', 'RecentFailureDebrisOnSlope',
                     'Erosion', 'CracksAtSlopeSides', 'BlockedRoadsideDrain', 'BlockedSlopeDrainage']:
         user_input[feature] = st.selectbox(feature, categorical_options[feature], key=f"cat_{feature}")
 
     # Grupo 2: Regiones y clima
-    st.markdown("**Geographic/Climatic**")
+    st.markdown("**🌧️ Geographic/Climatic**")
     for feature in ['PhysiographicRegion', 'RainfallCategory', 'Aspect']:
         user_input[feature] = st.selectbox(feature, categorical_options[feature], key=f"cat_{feature}")
 
     # Grupo 3: Geología
-    st.markdown("**Geology**")
+    st.markdown("**🧱 Geology**")
     for feature in ['Dominant', 'RockStrength', 'LithologyRockTypeCat2', 'WeatheringGradeCat2']:
         user_input[feature] = st.selectbox(feature, categorical_options[feature], key=f"cat_{feature}")
 
     # Grupo 4: Infraestructura y drenaje
-    st.markdown("**Drainage & Structures**")
+    st.markdown("**🚧 Drainage & Structures**")
     for feature in ['DrainageCat2', 'StructureCat2', 'DrainageCondition']:
         user_input[feature] = st.selectbox(feature, categorical_options[feature], key=f"cat_{feature}")
 
     # Grupo 5: Vegetación
-    st.markdown("**Vegetation**")
+    st.markdown("**🌿 Vegetation**")
     user_input['CutSlopeBioCat1'] = st.selectbox('CutSlopeBioCat1', categorical_options['CutSlopeBioCat1'], key="cat_CutSlopeBioCat1")
 
 if st.button("Predict Stability"):
