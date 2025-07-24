@@ -111,8 +111,8 @@ for feature, options in categorical_options.items():
 st.subheader("🌐 Location Input")
 
 # Coordenadas de ejemplo (puedes usar las que el usuario introduzca)
-latitude = 27.7172
-longitude = 85.3240
+latitude = st.number_input("Latitud", value=27.7172, format="%.6f")
+longitude = st.number_input("Longitud", value=85.3240, format="%.6f")
 
 # Mostrar en el mapa
 st.subheader("🗺️ Slope Location Map")
@@ -128,11 +128,11 @@ st.pydeck_chart(pdk.Deck(
     ),
     layers=[
         pdk.Layer(
-            "ScatterplotLayer",
-            data=map_data,
-            get_position='[lon, lat]',
+            'ScatterplotLayer',
+            data=[{"position": [longitude, latitude]}],
+            get_position='position',
             get_color='[255, 0, 0, 160]',
-            get_radius=200,
+            get_radius=300,
         ),
     ],
 ))
