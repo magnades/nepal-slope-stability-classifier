@@ -97,30 +97,6 @@ with col1:
     for feature in numeric_defaults:
         user_input[feature] = st.number_input(feature, value=numeric_defaults[feature])
 
-    st.subheader("🌐 Location Input")
-    user_input["Latitude"] = st.number_input("Latitude", value=27.7172, format="%.6f")
-    user_input["Longitude"] = st.number_input("Longitude", value=85.3240, format="%.6f")
-
-    st.subheader("🗺️ Slope Location Map")
-    map_data = pd.DataFrame({'lat': [user_input["Latitude"]], 'lon': [user_input["Longitude"]]})
-    st.pydeck_chart(pdk.Deck(
-        map_style=None,
-        initial_view_state=pdk.ViewState(
-            latitude=user_input["Latitude"],
-            longitude=user_input["Longitude"],
-            zoom=10,
-            pitch=0,
-        ),
-        layers=[
-            pdk.Layer(
-                'ScatterplotLayer',
-                data=[{"position": [user_input["Longitude"], user_input["Latitude"]]}],
-                get_position='position',
-                get_color='[255, 0, 0, 160]',
-                get_radius=300,
-            ),
-        ],
-    ))
 
     if st.button("🔮 Predict Stability"):
         input_ordered = [user_input[feat] for feat in features_ordered]
@@ -158,3 +134,28 @@ with col2:
     st.subheader("🧭 Geometría y Suelo")
     for feature in ['Aspect', 'Dominant']:
         user_input[feature] = st.selectbox(feature, categorical_options[feature])
+
+st.subheader("🌐 Location Input")
+user_input["Latitude"] = st.number_input("Latitude", value=28.5341666667, format="%.6f")
+user_input["Longitude"] = st.number_input("Longitude", value=82.3597222222, format="%.6f")
+
+st.subheader("🗺️ Slope Location Map")
+map_data = pd.DataFrame({'lat': [user_input["Latitude"]], 'lon': [user_input["Longitude"]]})
+st.pydeck_chart(pdk.Deck(
+    map_style=None,
+    initial_view_state=pdk.ViewState(
+        latitude=user_input["Latitude"],
+        longitude=user_input["Longitude"],
+        zoom=10,
+        pitch=0,
+    ),
+    layers=[
+        pdk.Layer(
+            'ScatterplotLayer',
+            data=[{"position": [user_input["Longitude"], user_input["Latitude"]]}],
+            get_position='position',
+            get_color='[255, 0, 0, 160]',
+            get_radius=300,
+        ),
+    ],
+))
