@@ -117,6 +117,7 @@ with col2:
 
     st.subheader("🌧️ Clima y Ubicación")
     for feature in ['RainfallCategory', 'PhysiographicRegion']:
+        print(st.selectbox(feature, categorical_options[feature]))
         user_input[feature] = st.selectbox(feature, categorical_options[feature])
 
     st.subheader("🧱 Geología / Litología")
