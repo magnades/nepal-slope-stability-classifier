@@ -112,7 +112,7 @@ with col1:
         initial_view_state=pdk.ViewState(
             latitude=28.40690234,
             longitude=84.26631178,
-            zoom=5,
+            zoom=4.5,
             pitch=0,
         ),
         layers=[
@@ -121,7 +121,7 @@ with col1:
                 data=[{"position": [longitude, latitude]}],
                 get_position='position',
                 get_color='[255, 0, 0, 160]',
-                get_radius=300,
+                get_radius=600,
             ),
         ],
     ))
