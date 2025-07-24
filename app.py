@@ -116,7 +116,7 @@ with col2:
         user_input[feature] = "Yes" if st.checkbox(label, value=False) else "No"
 
     st.subheader("🌧️ Clima y Ubicación")
-    for feature in ['PhysiographicRegion', 'RainfallCategory']:
+    for feature in ['RainfallCategory', 'PhysiographicRegion']:
         user_input[feature] = st.selectbox(feature, categorical_options[feature])
 
     st.subheader("🧱 Geología / Litología")
