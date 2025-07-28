@@ -139,8 +139,16 @@ with col1:
     for feature in numeric_defaults:
         min_val, max_val = numeric_ranges[feature]
         default = numeric_defaults[feature]
-        user_input[feature] = st.slider(feature, min_value=min_val, max_value=max_val, value=default,
-                                        key=f"slider_{feature}")
+        # user_input[feature] = st.slider(feature, min_value=min_val, max_value=max_val, value=default,
+        #                                 key=f"slider_{feature}")
+        user_input[feature] = st.slider(
+            feature,
+            min_value=float(min_val),
+            max_value=float(max_val),
+            value=float(default),
+            step=0.1,
+            key=f"slider_{feature}"
+        )
 
     st.subheader("🌐 Location Input")
     latitude = st.number_input("Latitude", value=28.5341666667, format="%.6f", key="latitude")
