@@ -66,19 +66,19 @@ numeric_defaults = {
 
 
 numeric_ranges = {
-    'Longitude': (80.0, 85.0),
-    'Latitude': (26.0, 31.0),
-    'ElevationDEM': (100, 4000),
-    'ElevationSite': (100, 4000),
-    'AverageCutHeight': (0, 30),
-    'AverageCutSlope': (0, 90),
-    'FinalOverallSlope': (0, 90),
-    'PercentageOfSoil': (0, 100),
-    'CutWidth': (0, 50),
-    'BelowSlope': (0, 100),
-    'AverageTopsoilThickness': (0, 10),
-    'BelowHeight': (0, 100),
-    'MaxTopsoilThickness': (0, 10),
+    'Longitude': (80.34, 87.96),
+    'Latitude': (26.76, 29.44),
+    'ElevationDEM': (184.00, 2966.00),
+    'ElevationSite': (180.00, 3000.00),
+    'AverageCutHeight': (2.00, 160.00),
+    'AverageCutSlope': (25.00, 100.00),
+    'FinalOverallSlope': (0.00, 80.00),
+    'PercentageOfSoil': (0.00, 100.00),
+    'CutWidth': (3.00, 400.00),
+    'BelowSlope': (10.00, 90.00),
+    'AverageTopsoilThickness': (0.00, 30.00),
+    'BelowHeight': (0.04, 550.00),
+    'MaxTopsoilThickness': (0.10, 30.00),
 }
 
 categorical_options = {
