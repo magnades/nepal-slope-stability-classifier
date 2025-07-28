@@ -64,6 +64,23 @@ numeric_defaults = {
     'CutWidth': 25., 'BelowSlope': 70., 'AverageTopsoilThickness': 5, 'BelowHeight': 50, 'MaxTopsoilThickness': 5,
 }
 
+
+numeric_ranges = {
+    'Longitude': (80.0, 85.0),
+    'Latitude': (26.0, 31.0),
+    'ElevationDEM': (100, 4000),
+    'ElevationSite': (100, 4000),
+    'AverageCutHeight': (0, 30),
+    'AverageCutSlope': (0, 90),
+    'FinalOverallSlope': (0, 90),
+    'PercentageOfSoil': (0, 100),
+    'CutWidth': (0, 50),
+    'BelowSlope': (0, 100),
+    'AverageTopsoilThickness': (0, 10),
+    'BelowHeight': (0, 100),
+    'MaxTopsoilThickness': (0, 10),
+}
+
 categorical_options = {
     'PhysiographicRegion': ['MidHill', 'Chure', 'UpperHill'],
     'RainfallCategory': ['L', 'H', 'M'],
@@ -86,13 +103,27 @@ categorical_options = {
     'DrainageCondition': ['Functional', 'NeedsRepairOrCleaning', 'UnderConstruction'],
 }
 
+stability_labels = {
+    'A': 'Stable (A)',
+    'B': 'Slightly Unstable (B)',
+    'C': 'Moderately Unstable (C)',
+    'D': 'Highly Unstable (D)'
+}
+
+stability_colors = {
+    'A': '#4CAF50',  # Green
+    'B': '#FFEB3B',  # Yellow
+    'C': '#FF9800',  # Orange
+    'D': '#F44336',  # Red
+}
+
 slopes_categories_dict = {
     'A': 'Stable, A',
     'B': 'Slightly Unstable, B',
     'C': 'Moderately Unstable, C',
     'D': 'Highly Unstable, D',
 }
-st.title("Nepal Slope Stability Classifier")
+st.title("🧭 Nepal Slope Stability Classifier")
 st.markdown("This app predicts slope stability using a machine learning model trained on Nepal slope data.")
 
 user_input = {}
@@ -101,9 +132,15 @@ col1, col2 = st.columns(2)
 
 with col1:
     st.subheader("📊 Numeric Features")
+    # for feature in numeric_defaults:
+    #     if feature not in ['Latitude', 'Longitude']:
+    #         user_input[feature] = st.number_input(feature, value=numeric_defaults[feature], key=f"num_{feature}")
+
     for feature in numeric_defaults:
-        if feature not in ['Latitude', 'Longitude']:
-            user_input[feature] = st.number_input(feature, value=numeric_defaults[feature], key=f"num_{feature}")
+        min_val, max_val = numeric_ranges[feature]
+        default = numeric_defaults[feature]
+        user_input[feature] = st.slider(feature, min_value=min_val, max_value=max_val, value=default,
+                                        key=f"slider_{feature}")
 
     st.subheader("🌐 Location Input")
     latitude = st.number_input("Latitude", value=28.5341666667, format="%.6f", key="latitude")
@@ -161,13 +198,51 @@ with col2:
     st.markdown("**🌿 Vegetation**")
     user_input['CutSlopeBioCat1'] = st.selectbox('CutSlopeBioCat1', categorical_options['CutSlopeBioCat1'], key="cat_CutSlopeBioCat1")
 
-if st.button("Predict Stability"):
-    input_ordered = [user_input[feat] for feat in features_ordered]
-    df = pd.DataFrame([input_ordered], columns=features_ordered)
-    transformed = preprocessor.transform(df)
-    prediction = model.predict(transformed)
-    predicted_class = stability_encoder.inverse_transform([np.argmax(prediction)])
+# if st.button("Predict Stability"):
+#     input_ordered = [user_input[feat] for feat in features_ordered]
+#     df = pd.DataFrame([input_ordered], columns=features_ordered)
+#     transformed = preprocessor.transform(df)
+#     prediction = model.predict(transformed)
+#     predicted_class = stability_encoder.inverse_transform([np.argmax(prediction)])
+#
+#     st.success(f"Predicted Class: {slopes_categories_dict[predicted_class[0]]}")
+#     st.write(f"Raw probabilities: {prediction.tolist()}")
+#     st.caption(f"Prediction time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
-    st.success(f"Predicted Class: {slopes_categories_dict[predicted_class[0]]}")
-    st.write(f"Raw probabilities: {prediction.tolist()}")
-    st.caption(f"Prediction time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+# --- Prediction logic ---
+def make_prediction(input_data):
+    ordered_values = [input_data[feat] for feat in features_ordered]
+    df = pd.DataFrame([ordered_values], columns=features_ordered)
+    transformed = preprocessor.transform(df)
+    probabilities = model.predict(transformed)[0]
+    pred_index = np.argmax(probabilities)
+    pred_class = stability_encoder.inverse_transform([pred_index])[0]
+    return pred_class, probabilities
+
+# Trigger prediction
+predict_now = True  # Always predict automatically
+if st.button("🔍 Predict Stability"):
+    predict_now = True
+
+if predict_now:
+    pred_class, probabilities = make_prediction(user_input)
+    label = stability_labels[pred_class]
+    color = stability_colors.get(pred_class, "#D3D3D3")
+
+    st.markdown(
+        f"<div style='background-color: {color}; padding: 20px; border-radius: 10px;'>"
+        f"<h3 style='color: white;'>Predicted Stability: {label}</h3>"
+        f"<p><strong>Confidence:</strong> {np.max(probabilities):.2f}</p>"
+        f"</div>",
+        unsafe_allow_html=True
+    )
+
+    # Bar chart
+    prob_df = pd.DataFrame({
+        'Stability Level': [stability_labels[c] for c in stability_encoder.classes_],
+        'Probability': probabilities
+    })
+    st.subheader("📈 Stability Class Probabilities")
+    st.bar_chart(prob_df.set_index("Stability Level"))
+
+    st.caption(f"Prediction generated at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
