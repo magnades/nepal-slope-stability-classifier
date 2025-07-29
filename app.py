@@ -124,6 +124,8 @@ slopes_categories_dict = {
     'D': 'Highly Unstable, D',
 }
 st.title("🧭 Nepal Slope Stability Classifier")
+st.caption("Developed by **Juan Carlos Pantoja**")
+
 st.markdown("This app predicts slope stability using a machine learning model trained on Nepal slope data.")
 
 user_input = {}
@@ -254,3 +256,6 @@ if predict_now:
     st.bar_chart(prob_df.set_index("Stability Level"))
 
     st.caption(f"Prediction generated at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+
+st.markdown("---")
+st.caption("🧑‍💻 App developed by **Juan Carlos Pantoja** 🏍️")
