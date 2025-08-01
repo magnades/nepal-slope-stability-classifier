@@ -262,7 +262,7 @@ st.caption("🧑‍💻 App developed by **Juan Carlos Pantoja** 🏍️")
 # Sidebar disclaimer
 st.sidebar.title("About")
 
-with st.sidebar.expander("ℹ️ Disclaimer"):
+with st.sidebar.expander("ℹ️ Disclaimer", expanded=True):
     st.markdown(
         """
         **This application is a demonstration tool**  
