@@ -259,3 +259,26 @@ if predict_now:
 
 st.markdown("---")
 st.caption("🧑‍💻 App developed by **Juan Carlos Pantoja** 🏍️")
+# Sidebar disclaimer
+st.sidebar.title("About")
+
+with st.sidebar.expander("ℹ️ Disclaimer"):
+    st.markdown(
+        """
+        **This application is a demonstration tool**  
+        developed as part of the study  
+        *"Advancing Slope Stability Prediction with Evolutionary Neural Networks: Nepal Case Study"*.
+
+        It is intended **solely for academic and informational purposes**.  
+        Predictions may be inaccurate or incomplete, and **should not be used for real-world engineering decisions**.
+
+        Use of this tool **does not imply any legal, contractual, or professional relationship**  
+        with the authors or affiliated institutions.
+
+        This app is provided *"as is"*, without any warranty.  
+        The authors disclaim all liability for any use of this tool.
+
+        [Creative Commons License](http://creativecommons.org/licenses/by-nc/3.0/deed.en_US)
+        """,
+        unsafe_allow_html=True
+    )
